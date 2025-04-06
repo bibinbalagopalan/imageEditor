@@ -11,7 +11,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewContainer = document.querySelector('.image-preview');
     previewContainer.style.position = 'relative';
     previewContainer.style.overflow = 'hidden';
-    
+    previewContainer.style.userSelect = 'none';
+    previewContainer.style.webkitUserSelect = 'none';
+    previewContainer.style.msUserSelect = 'none';
+
+    previewImage.style.pointerEvents = 'none';
+    previewImage.style.userSelect = 'none';
+    previewImage.style.webkitUserSelect = 'none';
+    previewImage.style.msUserSelect = 'none';
     let cropOverlay = document.createElement('div');
     cropOverlay.style.position = 'absolute';
     cropOverlay.style.border = '2px dashed #fff';
@@ -148,37 +155,44 @@ document.addEventListener('DOMContentLoaded', function() {
     function initCrop() {
         isCropping = true;
         previewImage.style.cursor = 'crosshair';
+        previewImage.style.userSelect = 'none';
+        previewImage.style.pointerEvents = 'none';
         cropOverlay.style.display = 'block';
+        cropOverlay.style.pointerEvents = 'auto';
         
-        previewImage.addEventListener('mousedown', startCrop);
-        previewImage.addEventListener('mousemove', updateCrop);
-        previewImage.addEventListener('mouseup', endCrop);
+        previewContainer.addEventListener('mousedown', startCrop);
+        previewContainer.addEventListener('mousemove', updateCrop);
+        previewContainer.addEventListener('mouseup', endCrop);
     }
 
     function startCrop(e) {
         if (!isCropping) return;
-        const rect = previewImage.getBoundingClientRect();
-        cropStartX = e.clientX - rect.left;
-        cropStartY = e.clientY - rect.top;
-        cropOverlay.style.left = cropStartX + 'px';
-        cropOverlay.style.top = cropStartY + 'px';
+        e.preventDefault();
+        const rect = previewContainer.getBoundingClientRect();
+        const imageRect = previewImage.getBoundingClientRect();
+        cropStartX = e.clientX - imageRect.left;
+        cropStartY = e.clientY - imageRect.top;
+        cropOverlay.style.left = (imageRect.left - rect.left + cropStartX) + 'px';
+        cropOverlay.style.top = (imageRect.top - rect.top + cropStartY) + 'px';
         cropOverlay.style.width = '0px';
         cropOverlay.style.height = '0px';
     }
 
     function updateCrop(e) {
         if (!isCropping || e.buttons !== 1) return;
-        const rect = previewImage.getBoundingClientRect();
-        cropEndX = e.clientX - rect.left;
-        cropEndY = e.clientY - rect.top;
+        e.preventDefault();
+        const rect = previewContainer.getBoundingClientRect();
+        const imageRect = previewImage.getBoundingClientRect();
+        cropEndX = e.clientX - imageRect.left;
+        cropEndY = e.clientY - imageRect.top;
 
         const width = Math.abs(cropEndX - cropStartX);
         const height = Math.abs(cropEndY - cropStartY);
         const left = Math.min(cropStartX, cropEndX);
         const top = Math.min(cropStartY, cropEndY);
 
-        cropOverlay.style.left = left + 'px';
-        cropOverlay.style.top = top + 'px';
+        cropOverlay.style.left = (imageRect.left - rect.left + left) + 'px';
+        cropOverlay.style.top = (imageRect.top - rect.top + top) + 'px';
         cropOverlay.style.width = width + 'px';
         cropOverlay.style.height = height + 'px';
     }
@@ -199,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmCropBtn.style.left = (left + width + 10) + 'px';
         confirmCropBtn.style.top = top + 'px';
 
-        previewImage.removeEventListener('mousemove', updateCrop);
+        previewContainer.removeEventListener('mousemove', updateCrop);
     }
 
     function applyCrop() {
@@ -208,17 +222,25 @@ document.addEventListener('DOMContentLoaded', function() {
         const img = new Image();
 
         img.onload = function() {
-            const scaleX = img.width / previewImage.width;
-            const scaleY = img.height / previewImage.height;
+            const rect = previewContainer.getBoundingClientRect();
+            const imageRect = previewImage.getBoundingClientRect();
+            const scaleX = img.naturalWidth / imageRect.width;
+            const scaleY = img.naturalHeight / imageRect.height;
 
-            const cropWidth = Math.abs(cropEndX - cropStartX) * scaleX;
-            const cropHeight = Math.abs(cropEndY - cropStartY) * scaleY;
-            const cropLeft = Math.min(cropStartX, cropEndX) * scaleX;
-            const cropTop = Math.min(cropStartY, cropEndY) * scaleY;
+            const cropLeft = Math.min(cropStartX, cropEndX);
+            const cropTop = Math.min(cropStartY, cropEndY);
+            const cropWidth = Math.abs(cropEndX - cropStartX);
+            const cropHeight = Math.abs(cropEndY - cropStartY);
 
-            canvas.width = cropWidth;
-            canvas.height = cropHeight;
-            ctx.drawImage(img, cropLeft, cropTop, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+            // Scale the crop coordinates to match the original image dimensions
+            const scaledLeft = cropLeft * scaleX;
+            const scaledTop = cropTop * scaleY;
+            const scaledWidth = cropWidth * scaleX;
+            const scaledHeight = cropHeight * scaleY;
+
+            canvas.width = scaledWidth;
+            canvas.height = scaledHeight;
+            ctx.drawImage(img, scaledLeft, scaledTop, scaledWidth, scaledHeight, 0, 0, scaledWidth, scaledHeight);
             const newImageData = canvas.toDataURL();
             previewImage.src = newImageData;
             saveToHistory(newImageData);
@@ -234,9 +256,9 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmCropBtn.style.display = 'none';
         cropStartX = cropStartY = cropEndX = cropEndY = null;
         
-        previewImage.removeEventListener('mousedown', startCrop);
-        previewImage.removeEventListener('mousemove', updateCrop);
-        previewImage.removeEventListener('mouseup', endCrop);
+        previewContainer.removeEventListener('mousedown', startCrop);
+        previewContainer.removeEventListener('mousemove', updateCrop);
+        previewContainer.removeEventListener('mouseup', endCrop);
     }
 
     // Image manipulation functions
