@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Editor</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'editor/css/style.css' %}" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="editor-panel">
+        <h2>Image Editor</h2>
+        <div class="upload-box">
+          <form method="post" enctype="multipart/form-data" id="upload-form">
+            {% csrf_token %}
+            <input type="file" name="image" id="image-input" accept="image/*" />
+            <label for="image-input">Choose an Image</label>
+          </form>
+        </div>
+        <div class="tools">
+          <div class="tool-group">
+            <h3>Basic Adjustments</h3>
+            <button id="rotate-left">Rotate Left</button>
+            <button id="rotate-right">Rotate Right</button>
+            <button id="flip-horizontal">Flip Horizontal</button>
+            <button id="flip-vertical">Flip Vertical</button>
+          </div>
+          <div class="tool-group">
+            <h3>Filters</h3>
+            <div class="filter-control">
+              <button id="brightness">Brightness</button>
+              <input type="range" id="brightness-slider" min="50" max="200" value="100">
+            </div>
+            <div class="filter-control">
+              <button id="contrast">Contrast</button>
+              <input type="range" id="contrast-slider" min="50" max="200" value="100">
+            </div>
+            <div class="filter-control">
+              <button id="grayscale">Grayscale</button>
+              <input type="range" id="grayscale-slider" min="0" max="100" value="0">
+            </div>
+            <div class="filter-control">
+              <button id="blur">Blur</button>
+              <input type="range" id="blur-slider" min="0" max="10" value="0" step="0.5">
+            </div>
+          </div>
+          <div class="tool-group">
+            <h3>Actions</h3>
+            <button id="crop">Crop</button>
+            <button id="undo">Undo</button>
+            <button id="reset">Reset</button>
+            <button id="save">Save Image</button>
+          </div>
+        </div>
+      </div>
+      <div class="preview-panel">
+        <div class="image-preview">
+          <img
+            id="preview-image"
+            src="{% static 'editor/images/placeholder.svg' %}"
+            alt="Preview"
+          />
+        </div>
+      </div>
+    </div>
+    <script src="{% static 'editor/js/script.js' %}"></script>
+  </body>
+</html>
