@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Image Editor</title>
     {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="{% static 'editor/css/style.css' %}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tippy.js@6.3.7/dist/tippy.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tippy.js@6.3.7/dist/tippy-bundle.umd.min.js"></script>
   </head>
   <body>
     <div class="container">
@@ -21,36 +25,40 @@
         <div class="tools">
           <div class="tool-group">
             <h3>Basic Adjustments</h3>
-            <button id="rotate-left">Rotate Left</button>
-            <button id="rotate-right">Rotate Right</button>
-            <button id="flip-horizontal">Flip Horizontal</button>
-            <button id="flip-vertical">Flip Vertical</button>
+            <button id="rotate-left" data-tippy-content="Rotate 90° Left"><i class="fas fa-undo"></i>Rotate Left</button>
+            <button id="rotate-right" data-tippy-content="Rotate 90° Right"><i class="fas fa-redo"></i>Rotate Right</button>
+            <button id="flip-horizontal" data-tippy-content="Flip Horizontally"><i class="fas fa-arrows-alt-h"></i>Flip Horizontal</button>
+            <button id="flip-vertical" data-tippy-content="Flip Vertically"><i class="fas fa-arrows-alt-v"></i>Flip Vertical</button>
           </div>
           <div class="tool-group">
             <h3>Filters</h3>
             <div class="filter-control">
-              <button id="brightness">Brightness</button>
+              <button id="brightness" data-tippy-content="Adjust Image Brightness"><i class="fas fa-sun"></i>Brightness</button>
               <input type="range" id="brightness-slider" min="50" max="200" value="100">
+              <div class="filter-value"><span id="brightness-value">100%</span></div>
             </div>
             <div class="filter-control">
-              <button id="contrast">Contrast</button>
+              <button id="contrast" data-tippy-content="Adjust Image Contrast"><i class="fas fa-adjust"></i>Contrast</button>
               <input type="range" id="contrast-slider" min="50" max="200" value="100">
+              <div class="filter-value"><span id="contrast-value">100%</span></div>
             </div>
             <div class="filter-control">
-              <button id="grayscale">Grayscale</button>
+              <button id="grayscale" data-tippy-content="Convert to Grayscale"><i class="fas fa-palette"></i>Grayscale</button>
               <input type="range" id="grayscale-slider" min="0" max="100" value="0">
+              <div class="filter-value"><span id="grayscale-value">0%</span></div>
             </div>
             <div class="filter-control">
-              <button id="blur">Blur</button>
+              <button id="blur" data-tippy-content="Apply Blur Effect"><i class="fas fa-dot-circle"></i>Blur</button>
               <input type="range" id="blur-slider" min="0" max="10" value="0" step="0.5">
+              <div class="filter-value"><span id="blur-value">0px</span></div>
             </div>
           </div>
           <div class="tool-group">
             <h3>Actions</h3>
-            <button id="crop">Crop</button>
-            <button id="undo">Undo</button>
-            <button id="reset">Reset</button>
-            <button id="save">Save Image</button>
+            <button id="crop" data-tippy-content="Crop Image"><i class="fas fa-crop-alt"></i>Crop</button>
+            <button id="undo" data-tippy-content="Undo Last Action"><i class="fas fa-undo-alt"></i>Undo</button>
+            <button id="reset" data-tippy-content="Reset All Changes"><i class="fas fa-sync-alt"></i>Reset</button>
+            <button id="save" class="primary-button" data-tippy-content="Save Edited Image"><i class="fas fa-save"></i>Save Image</button>
           </div>
         </div>
       </div>
@@ -65,5 +73,23 @@
       </div>
     </div>
     <script src="{% static 'editor/js/script.js' %}"></script>
+    <script>
+      tippy('[data-tippy-content]', {
+        placement: 'right',
+        animation: 'scale',
+        theme: 'dark',
+      });
+
+      // Update filter values display
+      const sliders = ['brightness', 'contrast', 'grayscale', 'blur'];
+      sliders.forEach(filter => {
+        const slider = document.getElementById(`${filter}-slider`);
+        const value = document.getElementById(`${filter}-value`);
+        slider.addEventListener('input', () => {
+          const unit = filter === 'blur' ? 'px' : '%';
+          value.textContent = `${slider.value}${unit}`;
+        });
+      });
+    </script>
   </body>
 </html>
